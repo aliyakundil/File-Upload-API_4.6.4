@@ -1,0 +1,286 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: Arial, sans-serif;
+}
+
+#title {
+  text-align: center;
+  padding: 2rem;
+  background-color: #f4f4f4;
+}
+
+#container {
+  padding-top: 2rem;
+  & form {
+    max-width: 700px;
+    margin: 0 auto 2rem auto;
+    padding: 2rem;
+    background-color: #f4f4f4;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+
+    #submitBtn {
+      padding: 8px;
+      border: none;
+      cursor: pointer;
+      background-color: #000;
+      color: #fff;
+
+      &:hover {
+        opacity: 0.8;
+      }
+
+      &:disabled {
+        opacity: 0.3;
+        cursor: not-allow ed;
+      }
+    }
+  }
+}
+
+/* зона загрузки */
+#download-zone {
+  max-width: 700px;
+  margin: auto;
+  padding: 2rem;
+  background-color: #f4f4f4;
+}
+
+#notifications {
+  position: absolute;
+  top: 0;
+  left: 0;
+
+  & .notification {
+    text-align: center;
+    color: #000;
+    padding: 8px 2rem;
+
+    &.info {
+      background-color: cadetblue;
+    }
+    &.success {
+      background-color: green
+    }
+    &.error {
+      background-color: red;
+    }
+  }
+}
+
+.authorization {
+  display: flex;
+  justify-content: right;
+}
+
+/*		Login 		*/
+
+body.user {
+	background-size: cover;
+	margin: 0;
+	padding: 0;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	min-height: 100vh;
+	background-size: cover;
+	background-position: center;
+}
+
+.login-container {
+	display: flex;
+	flex-direction: column;  
+	align-items: center;     
+}
+
+.wrapper {
+	width: 420px;
+	background: transparent;
+	backdrop-filter: blur(20px);
+	box-shadow: 0 0 10px rgba(0, 0, 0, .2);
+	color: #333;
+	border-radius: 10px;
+	padding: 30px 40px;
+}
+
+.wrapper h1 {
+	font-size: 36px;
+	text-align: center;
+}
+
+.wrapper .input-box {
+	width: 100%;
+	height: 50px;
+	margin: 30px 0;
+	position: relative;
+}
+
+.input-box i.bxs-lock-alt{
+	margin-right: 40px;
+}
+
+#togglePassword {
+	cursor: pointer;
+}
+
+.input-box input {
+	width: 100%;
+	height: 100%;
+	background: transparent;
+	border: none;
+	outline: none;
+	border: 1px solid #333;
+	border-radius: 40px;
+	font-size: 16px;
+	color: #333;
+	padding: 20px 45px 20px 20px;
+}
+ 
+.input-box input::placeholder {
+	color: rgba(51, 51, 51, 0.5);
+}
+
+.input-box i {
+	position: absolute;
+	right: 20px;
+	top: 30%;
+	transform: translate(-50%);
+	font-size: 20px;
+}
+
+.remember {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	font-size: 14.5px;
+	margin: -15px 0 15px;
+}
+
+.remember label {
+	display: flex;
+	align-items: center;
+	gap: 5px;
+	cursor: pointer;
+}
+
+.remember label input {
+	accent-color: #333;
+	margin: 0; 
+	cursor: pointer;
+}
+
+.remember a {
+	color: #333;
+	text-decoration: none;
+}
+
+.remember a:hover {
+	text-decoration: underline;
+}
+
+.wrapper .btn {
+	width: 100%;
+	height: 45px;
+	background: rgb(38, 34, 35);;
+	border: none;
+	outline: none;
+	border-radius: 40px;
+	box-shadow: 0 0 10px rgb(0, 0, 0, .1);
+	cursor: pointer;
+	font-size: 16px;
+	color: #fff;
+	font-weight: 400;
+}
+
+.wrapper .register-link{
+	font-size: 14.5;
+	text-align: center;
+	margin-top: 20px;
+}
+
+.register-link p a {
+	color: #333;
+	text-decoration: none;
+	font-weight: 400;
+}
+
+.register-link p a:hover{
+	text-decoration: underline;
+	color: rgb(186, 12, 47);
+}
+
+/*********************************/
+
+
+/*---------User--------------*/
+  
+.authenticate {
+	display: inline-block;
+	justify-content: end;
+	top: 10px; 
+	right: 100px;
+	z-index: 10000;
+	font-size: 14px;
+}
+
+label.username {
+	cursor: pointer;
+}
+  
+.username-menu {
+	position: relative;
+	cursor: pointer;
+	list-style: none;
+	font-weight: 600;
+}
+
+.logout-link {
+	display: inline-flex;  
+	align-items: center;
+	color: #171822;
+	text-decoration: none;
+	gap: 8px;
+	cursor: pointer;
+	list-style: none;
+  }
+  
+.logout-link i {
+	font-size: 20px;
+	pointer-events: auto;
+}
+
+.username-menu ul li {
+	list-style: none;
+}
+  
+.username-menu > .dropdown {
+	padding: 0;
+	margin: 0;
+	position: absolute;
+	top: 100%;
+	display: none;
+	min-width: 100px;
+	box-shadow: 0 0 10px rgba(0,0,0,0.1);
+	z-index: 1000;
+	font-weight: 600;
+}
+  
+.username-menu:hover > .dropdown {
+	display: block;
+}
+  
+.username-menu ul li i {
+	font-size: 20px;
+}
+
+.username-menu ul li a {
+	color: #171822;  
+	text-decoration: none; 
+}
+
+.username-menu > .dropdown li a:hover {
+	color: rgb(186, 12, 47);
+}

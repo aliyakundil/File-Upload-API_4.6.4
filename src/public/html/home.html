@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Free TinyPNG</title>
+    <script src="/js/scripts.js" defer></script>
+    <link rel="stylesheet" href="/css/styles.css">
+    <link href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet" />
+</head>
+<body>
+    <!-- Блок пользователя -->
+
+    <div class="authenticate mb-3">
+        <ul>
+            <li class="username-menu">
+            <span id="usernameDisplay"></span> 
+            <ul class="dropdown">
+                <li>
+                <button id="loginBtn" class="btn">
+                    <i class='bx bx-log-out-circle'></i> Войти
+                </button>
+                <button id="logoutBtn" class="btn">
+                    <i class='bx bx-log-out-circle'></i> Выйти
+                </button>
+                </li>
+            </ul>
+            </li>
+        </ul>
+    </div>
+    
+    <div id="container">
+        <!-- multipart/form-data - ищет запросы с данными состоящей из нескольких частей -->
+        <form id="uploadForm" enctype="multipart/form-data">
+            <input type="file" id="upload-single" name="file">
+            <input type="file" id="upload-multiple" name="files" multiple>
+            <button type="submit" id="submitBtn">Загрузить</button>
+        </form>
+
+        <div id="download-zone"></div>
+        <div id="notifications"></div>
+    </div>
+</body>
+</html>

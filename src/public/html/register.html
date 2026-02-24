@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login</title>
+    <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
+    <link rel="stylesheet" href="/css/styles.css">
+    <!-- <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin> -->
+
+</head>
+<body class="user">
+  <!-- Section Login / Password -->
+<div class="register-container">
+  <div class="wrapper">
+    <h1>Регистрация</h1>
+    <div class="input-box">
+      <input id="username" type="text" placeholder="Имя" required>
+      <i class='bx bx-user'></i>
+    </div>
+    <div class="input-box">
+      <input id="email" type="email" placeholder="Почта" required>
+      <i class='bx bx-user'></i>
+    </div>
+    <div class="input-box">
+      <input id="password" class="password" type="password" placeholder="Пароль" required> 
+      <i class="bx bxs-lock-alt"></i>
+      <i class='bx bx-show' id="togglePassword"></i> 
+    </div>
+
+    <!-- <button type="button" id="registerBtn" class="btn">Зарегистрироваться</button> -->
+    <button type="button" id="registerBtn" class="btn">Зарегистрироваться</button>
+  </div>
+</div>
+
+  <script src="/js/authenticate.js" defer></script>
+</body>
+</html>
