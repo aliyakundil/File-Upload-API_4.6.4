@@ -4,7 +4,7 @@ import morgan from "morgan";
 import fileDirName from "./utils/dirname.js"
 import router from "./routes/upload.js";
 import authRouter from "./routes/auth.js"
-import { connectToDb } from "./config/database";
+import { connectToDb } from "./config/database.js";
 
 const app = express();
 const PORT = 3000;

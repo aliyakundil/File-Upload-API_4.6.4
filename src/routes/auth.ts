@@ -27,30 +27,6 @@ const REFRESH_TOKEN_SECRET = process.env.REFRESH_TOKEN_SECRET;
 router.get('/login', getLoginPage);
 router.get('/register', getRegisterPage);
 
-// router.post("/auth/register", async (req, res) => {
-//   const { email, password, username, profile, isEmailVerified, role } =
-//     req.body;
-//   const { firstName, lastName, bio } = profile || {};
-
-//   if (!email || !password || !username) {
-//     return res.status(400).send({ error: "Missing required fields" });
-//   }
-
-//   const users = await registerUser(req.body);
-
-//   if (!users) return null;
-
-//   const userDto = {
-//     email: email,
-//     username: username,
-//     isEmailVerified: isEmailVerified,
-//     profile: profile,
-//     role: role,
-//   };
-
-//   res.status(201).send(userDto);
-// });
-
 router.post("/auth/register", async (req, res) => {
   const { email, password, username, profile } = req.body;
 

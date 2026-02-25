@@ -79,43 +79,68 @@ export async function postResizeImage(req: Request, res: Response) {
 
     await deleteFile(file.path)
 
-    return res.json({ success: true, downloadLinks: [file.originalname] });
+    return res.json({ success: true, downloadLinks: [uniqueName] });
   } catch (err) {
     res.status(500).json({ error: "Server error "})
   }
 }
 
 export async function postResizeImages(req: Request, res: Response) {
+  const files = req.files as Express.Multer.File[];
+  const downloadLinks: string[] = [];
+  const tempPaths: string[] = [];
+  const outputPaths: string[] = [];
+  let validationError: string | null = null;
+
+  if (!Array.isArray(files) || files.length === 0) {
+    return res.status(400).json({ error: "File not found" });
+  }
+
+  if (!req.user) return res.status(401).json({ error: "Unauthorized. Login first." })
+
+  if (!(req.user.role === "user" || req.user.role === "admin" )) {
+    return res.status(403).json({ error: "You don't have permission to upload files." });
+  }
+
+  // Проверка файлов
+  const allowedTypes = ['image/jpeg', 'image/png', 'image/gif'];
+  const allowedExts = ['.jpg', '.jpeg', '.png', '.gif'];
+    
+  for (const file of files) {
+    // Проверка MIME-типа
+    if (!allowedTypes.includes(file.mimetype)) {
+      validationError = `Unsupported file type: ${file.originalname}`
+      break; 
+    };
+
+    // Проверка расширения
+    const ext = path.extname(file.originalname).toLocaleLowerCase();
+    if (!allowedExts.includes(ext)) {
+      validationError = `File extension not allowed: ${file.originalname}` 
+      break;
+    }
+
+    tempPaths.push(file.path);
+  }
+
+  if (validationError) {
+    await Promise.all(
+      tempPaths.map(async (p) => {
+        try {
+          await fs.unlink(p)
+        } catch (err) {}
+      })
+    )
+
+    return res.status(400).json({ error: validationError });
+  }
+    
   try {
-    // const files = req.files;
-    const files = req.files as Express.Multer.File[];
-
-    const downloadLinks = [];
-
-    if (!Array.isArray(files)) return res.status(400).json({ error: "File not found" });
-
     for (const file of files) {
-      // Проверка MIME-типа
-      const allowedTypes = ['image/jpeg', 'image/png', 'image/gif'];
-      if (!allowedTypes.includes(file.mimetype)) return res.status(400).json({ error: "Unsupported file type" });
-
-      // Проверка расширения
-      const ext = path.extname(file.originalname).toLocaleLowerCase();
-      const allowedExts = ['.jpg', '.jpeg', '.png', '.gif'];
-      if (!allowedExts.includes(ext)) {
-        return res.status(400).json({ error: "File extension not allowed" })
-      }
-
-      if (!req.user) return res.status(401).json({ error: "Unauthorized. Login first." })
-
-      if (!(req.user.role === "user" || req.user.role === "admin" )) {
-        return res.status(403).json({ error: "You don't have permission to upload files." });
-      }
 
       // Генерация безопасного уникального имени
       const safeName = file.originalname.replace(/[^a-zA-Z0-9.-]/g, '_');
       const uniqueName = `${Date.now()}_${Math.floor(Math.random() * 10000)}_${safeName}`;
-
       const outputfileDir = path.join(__dirname, '..', '..', 'outputs', uniqueName);
 
       await reduceFileSize(file.path, outputfileDir);
@@ -131,15 +156,21 @@ export async function postResizeImages(req: Request, res: Response) {
 
       await fileDoc.save();
 
-      await deleteFile(file.path)
-
-      downloadLinks.push(file.originalname);
+      await fs.unlink(file.path);
     }
 
-    // res.json({ downloadLinks })
-      return res.json({ success: true, downloadLinks });
+    return res.json({ success: true, downloadLinks });
   } catch (err) {
-    res.status(500).json({ error: "Server error "})
+    await Promise.all([
+      ...tempPaths.map(async (p) => {
+        try { await fs.unlink(p); } catch {}
+      }),
+      ...outputPaths.map(async (p) => {
+        try { await fs.unlink(p); } catch {}
+      })
+    ]);
+
+    return res.status(500).json({ error: "Error saving files" });
   }
 }
 
