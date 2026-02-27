@@ -1,3 +1,39 @@
+async function authorizedFetch(url, options = {}) {
+    const token = localStorage.getItem("accessToken");
+
+    // Добавляем токен в заголовки
+    options.headers = {
+        ...options.headers,
+        'Authorization': `Bearer ${token}`,
+    };
+
+    // Выполняем запрос
+    const response = await fetch(url, options);
+
+    // Если 403 — токен просрочен
+    if (response.status === 403) {
+        console.log("Токен просрочен, попробуем обновить...");
+
+        const refreshToken = localStorage.getItem("refreshToken");
+
+        const refreshRes = await fetch("/api/auth/refresh", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ refreshToken })
+        });
+
+        const data = await refreshRes.json();
+        localStorage.setItem("accessToken", data.accessToken);
+        if (data.refreshToken) localStorage.setItem("refreshToken", data.refreshToken);
+
+        // Повторяем исходный запрос с новым токеном
+        options.headers['Authorization'] = `Bearer ${data.accessToken}`;
+        return await fetch(url, options);
+    }
+
+    return response;
+}
+
 document.addEventListener("DOMContentLoaded", () => {
     const singleInput = document.getElementById("upload-single");
     const multipleInput = document.getElementById("upload-multiple");
@@ -22,6 +58,12 @@ document.addEventListener("DOMContentLoaded", () => {
         usernameDisplay.textContent = "Гость";
         loginBtn.style.display = "inline-block"; 
         logoutBtn.style.display = 'none';        
+    }
+
+    if (token) {
+        loadFiles(); // только если токен есть
+    } else {
+        window.location.href = "/api/login";
     }
 
     // Обработчик кнопки
@@ -59,7 +101,7 @@ document.addEventListener("DOMContentLoaded", () => {
     async function uploadSingle(file) {
         const token = localStorage.getItem("accessToken");
 
-        console.log("TOKEN:", token); // добавь это
+        console.log("TOKEN:", token); 
 
     if (!token) {
         alert("Нет токена!");
@@ -75,9 +117,8 @@ document.addEventListener("DOMContentLoaded", () => {
         formData.append("file", file);
 
         try {
-            const res = await fetch("/api/upload/single", {
+            const res = await authorizedFetch("/api/upload/single", {
                 method: "POST",
-                headers: { "Authorization": `Bearer ${token}` },
                 body: formData
             });
 
@@ -106,9 +147,8 @@ document.addEventListener("DOMContentLoaded", () => {
         }
 
         try {
-            const res = await fetch("/api/upload/multiple", {
+            const res = await authorizedFetch("/api/upload/multiple", {
                 method: "POST",
-                headers: { "Authorization": `Bearer ${token}` },
                 body: formData
             });
 
@@ -124,14 +164,18 @@ document.addEventListener("DOMContentLoaded", () => {
     // Получение списка файлов
     async function loadFiles() {
         try {
-            const res = await fetch("/api/upload/files", {
-                headers: { "Authorization": `Bearer ${token}` },
-            });
-            const files = await res.json();
+            const res = await authorizedFetch("/api/upload/files");
 
+            if (!res.ok) {
+                const data = await res.json();
+                throw new Error(data.error || "Failed to load files");
+            }
+
+            const files = await res.json();
             renderFiles(files);
+
         } catch (err) {
-            showNotification("Failed to load files", "error");
+            showNotification(err.message, "error");
         }
     }
 
@@ -166,9 +210,8 @@ document.addEventListener("DOMContentLoaded", () => {
     // Удаление файла 
     async function deleteFile(filename) {
         try {
-            const res = await fetch(`/api/upload/file/${filename}`, {
+            const res = await authorizedFetch(`/api/upload/file/${filename}`, {
                 method: "DELETE",
-                headers: { "Authorization": `Bearer ${token}` },
             });
 
             const data = await res.json();

@@ -9,7 +9,7 @@ router.get('/', getHomePage);
 router.post('/single', authenticateToken, uploadMiddleware, postResizeImage);
 router.post('/multiple', authenticateToken, uploadsMiddleware, postResizeImages);
 router.get('/file/:filename', authenticateToken, getDownloadFileByName);
-router.get('/file', authenticateToken, getListAllFiles);
+router.get('/files', authenticateToken, getListAllFiles);
 router.delete('/file/:filename', authenticateToken, deleteFileByName)
 
 export default router;

@@ -5,6 +5,7 @@ import fileDirName from '../utils/dirname.js';
 import reduceFileSize from "../utils/reduceFileSize.js";
 import deleteFile from "../utils/deleteFile.js";
 import File from "../models/File.js";
+import { fileTypeFromBuffer } from 'file-type';
 
 const { __dirname } = fileDirName(import.meta.url);
 
@@ -48,6 +49,15 @@ export async function postResizeImage(req: Request, res: Response) {
     // Проверка расширения
     const ext = path.extname(file.originalname).toLocaleLowerCase();
     const allowedExts = ['.jpg', '.jpeg', '.png', '.gif'];
+
+    const buffer = await fs.readFile(file.path);
+    const fileType = await fileTypeFromBuffer(buffer);
+
+    if (!fileType || !allowedTypes.includes(fileType.mime)) {
+      await fs.unlink(file.path);
+      return res.status(400).json({ error: "File content does not match allowed image types" });
+    }
+
     if (!allowedExts.includes(ext)) {
       return res.status(400).json({ error: "File extension not allowed" })
     }
@@ -107,6 +117,15 @@ export async function postResizeImages(req: Request, res: Response) {
   const allowedExts = ['.jpg', '.jpeg', '.png', '.gif'];
     
   for (const file of files) {
+
+    const buffer = await fs.readFile(file.path);
+    const fileType = await fileTypeFromBuffer(buffer);
+
+    if (!fileType || !allowedTypes.includes(fileType.mime)) {
+      validationError = `Invalid file content: ${file.originalname}`;
+      break;
+    }
+
     // Проверка MIME-типа
     if (!allowedTypes.includes(file.mimetype)) {
       validationError = `Unsupported file type: ${file.originalname}`
@@ -177,14 +196,26 @@ export async function postResizeImages(req: Request, res: Response) {
 export async function getDownloadFileByName(req: Request, res: Response) {
   try {
     const { filename } = req.params;
-    
+
     if (!filename || Array.isArray(filename)) {
       return res.status(400).json({ error: "File identifier is missing" });
     }
 
     const filePath = path.join(__dirname, '..', '..', 'outputs', filename);
+    const requestedPath = path.resolve(filePath, filename);
 
-    res.download(filePath, (err) => {
+    if (!requestedPath.startsWith(filePath)) {
+      return res.status(400).json({ error: "Invalid file path" });
+    }
+
+    try {
+      await fs.access(requestedPath);
+    } catch {
+      return res.status(404).json({ error: "File not found" });
+    }
+  
+
+    res.download(requestedPath, (err) => {
       if (err) {
         res.status(401).json({ error: "Something went wrong downloading file" })
       }
@@ -198,7 +229,25 @@ export async function getListAllFiles(req: Request, res: Response) {
   try {
 
     const filePath = path.join(__dirname, '..', '..', 'outputs');
-    const files = await fs.readdir(filePath)
+    const filename = req.params.filename;
+
+    if (!filename || Array.isArray(filename)) {
+      return res.status(400).json({ error: "File identifier is missing" });
+    }
+
+    const requestedPath = path.resolve(filePath, filename);
+
+    if (!requestedPath.startsWith(filePath)) {
+      return res.status(400).json({ error: "Invalid file path" });
+    }
+
+    try {
+      await fs.access(requestedPath);
+    } catch {
+      return res.status(404).json({ error: "File not found" });
+    }
+    
+    const files = await fs.readdir(requestedPath)
 
     res.json({ files})
   } catch(err) {
@@ -208,11 +257,14 @@ export async function getListAllFiles(req: Request, res: Response) {
 
 export async function deleteFileByName(req: Request, res: Response) {
   try {
+    const filePath = path.join(__dirname, '..', '..', 'outputs');
     const { filename } = req.params;
 
-    if (!filename) return res.status(400).json({ error: "Filename is required" });
+    if (!filename || Array.isArray(filename)) return res.status(400).json({ error: "Filename is required" });
 
-    const file = await File.findOne({ savedName: filename });
+    const requestedPath = path.resolve(filePath, filename)
+
+    const file = await File.findOne({ savedName: requestedPath });
 
     if (!file) return res.status(404).json({ error: "File not found in database" });
 
@@ -229,6 +281,6 @@ export async function deleteFileByName(req: Request, res: Response) {
     return res.json({ success: true, msg: "File deleted successfully" })
 
   } catch (err) {
-    res.json(500).json({ error: "Server error" })
+    res.status(500).json({ error: "Server error" })
   }
 }

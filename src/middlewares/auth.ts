@@ -14,18 +14,21 @@ export async function authenticateToken(
   next: NextFunction,
 ) {
   const authHeader = req.headers["authorization"];
-  const token = authHeader && authHeader.split(" ")[1];
+  const token = authHeader?.split(" ")[1];
 
-   console.log("TOKEN:", token)
+  console.log("TOKEN RECEIVED:", token);
 
-  if (token == null) return res.sendStatus(401);
+  if (!token) return res.sendStatus(401);
 
-  jwt.verify(token, process.env.ACCESS_TOKEN_SECRET!, (err, user) => {
-    console.log("decoded token:", user);
-    if (err) return res.sendStatus(403);
-    req.user = user;
+  try {
+    const decoded = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET!) as AuthJwtPayload;
+    console.log("decoded token:", decoded);
+    req.user = decoded;
     next();
-  });
+  } catch (err) {
+    console.log("JWT error:", err);
+    res.sendStatus(403);
+  }
 }
 
 export function requireRole(role: string) {
